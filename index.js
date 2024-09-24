@@ -22,34 +22,24 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
+    // Connect the client to the server (optional starting in v4.7)
     await client.connect();
     const craftsCollection = client.db("craftsdb").collection("craft");
 
-    // get to ui
-    app.get("/crafts", async (req, res) => {
-      const cursor = craftsCollection.find();
-      const result = await cursor.toArray();
-      res.send(result);
-    });
-
-    // Getting specific coffee data
+    
+    // Get specific craft by ID
     app.get("/crafts/:id", async (req, res) => {
-      try {
-        const id = req.params.id;
-        const query = { _id: new ObjectId(id) };
-        const result = await craftsCollection.findOne(query);
-        if (result) {
-          res.send(result);
-        } else {
-          res.status(404).send({ error: "Coffee not found" });
-        }
-      } catch (error) {
-        res.status(500).send({ error: error.message });
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await craftsCollection.findOne(query);
+      if (result) {
+        res.send(result);
+      } else {
+        res.status(404).send({ error: "Craft not found" });
       }
     });
 
-    // post to db
+    // Add new craft
     app.post("/crafts", async (req, res) => {
       const newCraft = req.body;
       console.log(newCraft);
@@ -57,12 +47,13 @@ async function run() {
       res.send(result);
     });
 
-    // update item
+    // Update craft by ID
     app.put("/crafts/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const options = { upsert: true };
       const updatedCraft = req.body;
+
       const craft = {
         $set: {
           item_name: updatedCraft.item_name,
@@ -78,11 +69,20 @@ async function run() {
           imageURL: updatedCraft.imageURL,
         },
       };
+
       const result = await craftsCollection.updateOne(filter, craft, options);
       res.send(result);
     });
 
-    // Send a ping to confirm a successful connection
+    // Delete craft by ID
+    app.delete("/crafts/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await craftsCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // Ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
@@ -94,6 +94,7 @@ async function run() {
 }
 run().catch(console.dir);
 
+// Test route to check if the server is running
 app.get("/", (req, res) => {
   res.send("Artistry London server is running!");
 });
