@@ -26,7 +26,29 @@ async function run() {
     await client.connect();
     const craftsCollection = client.db("craftsdb").collection("craft");
 
-    
+    // Get crafts (with optional filtering by user email)
+    app.get("/crafts", async (req, res) => {
+      const userEmail = req.query.email; // Get userEmail from query parameter
+      console.log("Received email:", userEmail); // Log the received email
+
+      try {
+        let crafts;
+        if (userEmail) {
+          crafts = await craftsCollection // fetch all the matched email
+            .find({ user_email: userEmail })
+            .toArray();
+          console.log("Crafts found for user:", crafts);
+        } else {
+          crafts = await craftsCollection.find().toArray(); // Fetch all crafts if no email is provided
+          console.log("All crafts found:", crafts); // Log all crafts found
+        }
+        res.send(crafts);
+      } catch (error) {
+        console.error("Error fetching crafts:", error);
+        res.status(500).send("Error fetching crafts");
+      }
+    });
+
     // Get specific craft by ID
     app.get("/crafts/:id", async (req, res) => {
       const id = req.params.id;
