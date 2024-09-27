@@ -23,7 +23,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server (optional starting in v4.7)
-    // await client.connect();
+    // await client.connect(); // need to comment this line when host on vercel
     const craftsCollection = client.db("craftsdb").collection("craft");
 
     // Get crafts (with optional filtering by user email)
@@ -105,13 +105,13 @@ async function run() {
     });
 
     // Ping to confirm a successful connection
-    // await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 }); // need to comment this line while host on vercel
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
   } finally {
     // Ensures that the client will close when you finish/error
-    // await client.close();
+    // await client.close(); // comment this line in the time of host
   }
 }
 run().catch(console.dir);
